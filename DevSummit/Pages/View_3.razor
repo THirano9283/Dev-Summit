@@ -1,0 +1,97 @@
+@page "/view_3"
+@using DataSource1
+@using Models.DataSource1
+@inject IDataSource1Service DataSource1Service
+
+<div class="row-layout view-3-container">
+    <div class="column-layout group">
+        <h5 class="h5">
+            Datagrid
+        </h5>
+        <IgbGrid Data="@_dataSource1Product" PrimaryKey="Id" DisplayDensity="DisplayDensity.Cosy" RowEditable="true" AllowFiltering="true" FilterMode="FilterMode.ExcelStyleFilter" RowEditDone="ProductsRowEditDone" RowDeleted="ProductsRowDeleted" RowAdded="ProductsRowAdded" class="ig-typography grid" view_3-scope>
+            <IgbGridToolbar>
+                <IgbGridToolbarActions>
+                    <IgbGridToolbarExporter></IgbGridToolbarExporter>
+                    <IgbGridToolbarAdvancedFiltering></IgbGridToolbarAdvancedFiltering>
+                </IgbGridToolbarActions>
+                <IgbGridToolbarTitle>Grid Toolbar</IgbGridToolbarTitle>
+            </IgbGridToolbar>
+            <IgbColumn Field="Id" DataType="GridColumnDataType.String" Header="id" Sortable="true" Selectable="false"></IgbColumn>
+            <IgbColumn Field="ProductCode" DataType="GridColumnDataType.String" Header="productCode" Sortable="true" Selectable="false"></IgbColumn>
+            <IgbColumn Field="ProductName" DataType="GridColumnDataType.String" Header="productName" Sortable="true" Selectable="false"></IgbColumn>
+            <IgbColumn Field="Description" DataType="GridColumnDataType.String" Header="description" Sortable="true" Selectable="false"></IgbColumn>
+            <IgbColumn Field="Recommendations" DataType="GridColumnDataType.String" Header="recommendations" Sortable="true" Selectable="false"></IgbColumn>
+            <IgbColumn Field="SalesStartDate" DataType="GridColumnDataType.Date" Header="salesStartDate" Sortable="true" Selectable="false"></IgbColumn>
+            <IgbColumn Field="SalesEndDate" DataType="GridColumnDataType.Date" Header="salesEndDate" Sortable="true" Selectable="false"></IgbColumn>
+            <IgbColumn Field="UnitPrice" DataType="GridColumnDataType.Number" Header="unitPrice" Sortable="true" Selectable="false"></IgbColumn>
+            <IgbActionStrip>
+                <IgbGridPinningActions></IgbGridPinningActions>
+                <IgbGridEditingActions AddRow="true"></IgbGridEditingActions>
+            </IgbActionStrip>
+        </IgbGrid>
+    </div>
+</div>
+
+@code {
+    private List<Product> _dataSource1Product = new();
+
+    private async void ProductsRowEditDone(IgbGridEditDoneEventArgs args)
+    {
+        if(args.Detail.IsAddRow == false)
+        {
+            var product = (Product)args.Detail.RowData;
+            if (product != null)
+            {
+                var result = await DataSource1Service.PutProduct(product);
+                if (result != null)
+                {
+                    _dataSource1Product = await DataSource1Service.GetProductList() ?? _dataSource1Product;
+                    StateHasChanged();
+                }
+                else
+                {
+                    // TODO: handle errors here.
+                }
+            }
+        }
+    }
+
+    private async void ProductsRowDeleted(IgbRowDataEventArgs args)
+    {
+        var primaryKey = args.Detail.PrimaryKey?.ToString();
+        var result = await DataSource1Service.DeleteProduct(primaryKey);
+        if (result != null)
+        {
+            _dataSource1Product = await DataSource1Service.GetProductList() ?? _dataSource1Product;
+            StateHasChanged();
+        }
+        else
+        {
+            // TODO: handle errors here.
+        }
+    }
+
+    private async void ProductsRowAdded(IgbRowDataEventArgs args)
+    {
+        var product = (Product)args.Detail.Data;
+        if (product != null)
+        {
+            var result = await DataSource1Service.PostProduct(product);
+            if (result != null)
+            {
+                _dataSource1Product = await DataSource1Service.GetProductList() ?? _dataSource1Product;
+                StateHasChanged();
+            }
+            else
+            {
+                // TODO: handle errors here.
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _dataSource1Product = await DataSource1Service.GetProductList();
+        await base.OnInitializedAsync();
+    }
+}

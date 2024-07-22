@@ -1,0 +1,40 @@
+@page "/"
+@page "/view_1"
+@using Financial
+@using Models.Financial
+@inject IFinancialService FinancialService
+
+<div class="column-layout view-1-container">
+    <div class="row-layout group">
+        <div class="column-layout group_1">
+            <IgbCategoryChart DataSource="@_financialBoxOfficeRevenue" ChartType="CategoryChartType.Point" ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series" class="category-chart" view_1-scope></IgbCategoryChart>
+        </div>
+        <div class="column-layout group_1">
+            <IgbCategoryChart DataSource="@_financialBoxOfficeRevenue" ChartType="CategoryChartType.Spline" ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series" class="category-chart" view_1-scope></IgbCategoryChart>
+        </div>
+        <div class="column-layout group_1">
+            <IgbCategoryChart DataSource="@_financialBoxOfficeRevenue" ChartType="CategoryChartType.StepLine" ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series" class="category-chart" view_1-scope></IgbCategoryChart>
+        </div>
+    </div>
+    <div class="row-layout group">
+        <div class="column-layout group_1">
+            <IgbCategoryChart DataSource="@_financialBoxOfficeRevenue" ChartType="CategoryChartType.Waterfall" ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series" class="category-chart" view_1-scope></IgbCategoryChart>
+        </div>
+        <div class="column-layout group_1">
+            <IgbCategoryChart DataSource="@_financialBoxOfficeRevenue" ChartType="CategoryChartType.SplineArea" ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series" class="category-chart" view_1-scope></IgbCategoryChart>
+        </div>
+        <div class="column-layout group_1">
+            <IgbCategoryChart DataSource="@_financialBoxOfficeRevenue" ChartType="CategoryChartType.StepArea" ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series" class="category-chart" view_1-scope></IgbCategoryChart>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<BoxOfficeRevenueType> _financialBoxOfficeRevenue = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _financialBoxOfficeRevenue = await FinancialService.GetBoxOfficeRevenue();
+        await base.OnInitializedAsync();
+    }
+}

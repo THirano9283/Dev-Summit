@@ -1,0 +1,130 @@
+@page "/view_2"
+@using Northwind
+@using Models.Northwind
+@using Financial
+@using Models.Financial
+@inject INorthwindService NorthwindService
+@inject IFinancialService FinancialService
+
+<div class="column-layout view-2-container">
+    <div class="row-layout group">
+        <div class="column-layout group_1">
+            <IgbTreeGrid Data="@_northwindEmployees" PrimaryKey="EmployeeID" ForeignKey="ManagerID" DisplayDensity="DisplayDensity.Cosy" AllowFiltering="true" FilterMode="FilterMode.ExcelStyleFilter" AutoGenerate="false" class="ig-typography tree-grid" view_2-scope>
+                <IgbColumn Field="EmployeeID" DataType="GridColumnDataType.Number" Header="employeeID" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="LastName" DataType="GridColumnDataType.String" Header="lastName" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="FirstName" DataType="GridColumnDataType.String" Header="firstName" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="Title" DataType="GridColumnDataType.String" Header="title" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="TitleOfCourtesy" DataType="GridColumnDataType.String" Header="titleOfCourtesy" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="BirthDate" DataType="GridColumnDataType.Date" Header="birthDate" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="HireDate" DataType="GridColumnDataType.Date" Header="hireDate" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="Address.Street" DataType="GridColumnDataType.String" Header="address street" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="Address.City" DataType="GridColumnDataType.String" Header="address city" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="Address.Region" DataType="GridColumnDataType.String" Header="address region" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="Address.PostalCode" DataType="GridColumnDataType.String" Header="address postalCode" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="Address.Country" DataType="GridColumnDataType.String" Header="address country" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="Address.Phone" DataType="GridColumnDataType.String" Header="address phone" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="ManagerID" DataType="GridColumnDataType.Number" Header="managerID" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="Notes" DataType="GridColumnDataType.String" Header="notes" Sortable="true" Selectable="false"></IgbColumn>
+                <IgbColumn Field="AvatarUrl" DataType="GridColumnDataType.String" Header="avatarUrl" Sortable="true" Selectable="false"></IgbColumn>
+            </IgbTreeGrid>
+        </div>
+        <div class="column-layout group_1">
+            <div class="row-layout group_2">
+                <IgbPivotGrid Data="@_financialSales" PivotConfiguration="Config" SuperCompactMode="true" DefaultExpandState="true" class="ig-typography pivot-grid" view_2-scope></IgbPivotGrid>
+                <IgbPivotDataSelector></IgbPivotDataSelector>
+            </div>
+        </div>
+    </div>
+    <div class="row-layout group">
+        <div class="column-layout group_1">
+            <IgbCategoryChart DataSource="@_financialBoxOfficeRevenue" ChartType="CategoryChartType.Line" ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series" class="category-chart" view_2-scope></IgbCategoryChart>
+        </div>
+        <div class="column-layout group_1">
+            <IgbCategoryChart DataSource="@_financialBoxOfficeRevenue" ChartType="CategoryChartType.StepArea" ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series" class="category-chart" view_2-scope></IgbCategoryChart>
+        </div>
+        <div class="column-layout group_1">
+            <IgbPieChart DataSource="@_financialBoxOfficeRevenue" LabelMemberPath="Franchise" ValueMemberPath="TotalWorldBoxOfficeRevenue" class="pie-chart" view_2-scope></IgbPieChart>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<EmployeesType> _northwindEmployees = new();
+    private IgbPivotConfiguration _config;
+    private List<SalesType> _financialSales = new();
+    private List<BoxOfficeRevenueType> _financialBoxOfficeRevenue = new();
+
+    private IgbPivotConfiguration? Config
+    {
+        get
+        {
+            if (_config == null)
+            {
+                _config = new IgbPivotConfiguration();
+                _config.Columns.Add(new IgbPivotDimension()
+                {
+                    MemberName = "Country",
+                    Enabled = true
+                });
+                _config.Columns.Add(new IgbPivotDimension()
+                {
+                    MemberName = "Product",
+                    Enabled = true
+                });
+                _config.Rows.Add(new IgbPivotDateDimension
+                {
+                    BaseDimension = new IgbPivotDimension
+                    {
+                        MemberName = "Date",
+                        Enabled = true
+                    },
+                    Options = new IgbPivotDateDimensionOptions
+                    {
+                        Years = true,
+                        Months = false,
+                        Quarters = true
+                    }
+                });
+                _config.Values.Add(new IgbPivotValue()
+                {
+                    Member = "Sales",
+                    DataType = GridColumnDataType.Currency,
+                    Enabled = false,
+                    Aggregate = new IgbPivotAggregator()
+                    {
+                        Key = "Sum Of Sales",
+                        AggregatorName = PivotAggregationType.SUM,
+                        Label = "Sum"
+                    }
+                });
+                _config.Values.Add(new IgbPivotValue()
+                {
+                    Member = "Profit",
+                    DataType = GridColumnDataType.Currency,
+                    Enabled = true,
+                    Aggregate = new IgbPivotAggregator()
+                    {
+                        Key = "Sum Of Profit",
+                        AggregatorName = PivotAggregationType.SUM,
+                        Label = "Sum"
+                    }
+                });
+                _config.Filters.Add(new IgbPivotDimension()
+                {
+                    MemberName = "Month",
+                    Enabled = false
+                });
+            }
+
+            return _config;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _financialSales = await FinancialService.GetSales();
+        _financialBoxOfficeRevenue = await FinancialService.GetBoxOfficeRevenue();
+        _northwindEmployees = await NorthwindService.GetEmployees();
+        await base.OnInitializedAsync();
+    }
+}
